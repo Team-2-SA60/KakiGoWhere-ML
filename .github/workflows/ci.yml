@@ -27,7 +27,9 @@ jobs:
                 ${{ runner.os }}-pip-
 
       - name: Install Dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
       
       - name: Create Report Folder
         run: |
@@ -37,46 +39,25 @@ jobs:
         run: |
           pylint ./**/*.py > report/pylint-report.txt
 
-      - name: Upload pylint Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pylint-report
-          path: report/pylint-report.txt
-
       - name: Run pip-audit (SCA)
         if: always()
         run: |
           pip-audit > report/pip-audit-report.txt
-
-      - name: Upload Audit Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pip-audit-sca-report
-          path: report/pip-audit-report.txt
 
       - name: Run coverage (Code coverage)
         if: always()
         run: |
           coverage run -m pytest app/tests/testapi.py
           coverage report --fail-under=70 > report/coverage-report.txt
-
-      - name: Upload coverage Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: report/coverage-report.txt
       
       - name: Run unit tests
         if: always()
         run: |
           pytest app/tests/testapi.py > report/unittest-report.txt
 
-      - name: Upload unit tests Report
+      - name: Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: unittest-report
-          path: report/unittest-report.txt
+          name: reports
+          path: report/
