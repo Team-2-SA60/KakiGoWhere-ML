@@ -1,0 +1,10 @@
+# ignore virtual environment
+/.venv
+
+# ignore pycache
+*/*pycache*
+*/tests/*pycache*
+.pytest_cache
+
+# ignore coverage
+.coverage

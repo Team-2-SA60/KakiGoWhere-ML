@@ -1,0 +1,74 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: ['**']
+
+jobs:
+  push-checks:
+    name: Lint + SCA + Code Coverage + Pytest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+    
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Create Report Folder
+        run: |
+          mkdir -p report
+
+      - name: Run pylint
+        run: |
+          pylint ./**/*.py > report/pylint-report.txt
+
+      - name: Upload pylint Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pylint-report
+          path: report/pylint-report.txt
+
+      - name: Run pip-audit (SCA)
+        if: always()
+        run: |
+          pip-audit > report/pip-audit-report.txt
+
+      - name: Upload Audit Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-sca-report
+          path: report/pip-audit-report.txt
+
+      - name: Run coverage (Code coverage)
+        if: always()
+        run: |
+          coverage run -m pytest app/tests/testapi.py
+          coverage report --fail-under=70 > report/coverage-report.txt
+
+      - name: Upload coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: report/coverage-report.txt
+      
+      - name: Run unit tests
+        if: always()
+        run: |
+          pytest app/tests/testapi.py > report/unittest-report.txt
+
+      - name: Upload unit tests Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unittest-report
+          path: report/unittest-report.txt
