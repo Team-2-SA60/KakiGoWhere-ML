@@ -1,4 +1,4 @@
-#### For developing
+## For developing
 1. (Optional) Create virtual python environment
 ```
 python -m venv .venv
@@ -21,10 +21,10 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Local testing commands
+## Local testing commands
 1. Lint (Pylint)
 ```
-pylint ./**/*.py
+pylint --ignore=tests app
 ```
 
 2. SCA (pip-audit)
@@ -32,12 +32,28 @@ pylint ./**/*.py
 pip-audit
 ```
 
-3. Code coverage (coverage)
+3. Unit tests (pytest)
 ```
-coverage report /app/*
+coverage run -m pytest
 ```
 
-4. Unit tests (pytest)
+4. Code coverage (coverage)
 ```
-pytest app/tests/testapi.py
+coverage report --fail-under=70
+```
+
+## Docker
+1. Build docker iamge
+```
+docker build -f ./docker/Dockerfile -t flask-ml .
+```
+
+2. Run docker container. Access at http://localhost:5000
+```
+docker run -d --name flask-ml -p 5000:5000 -t flask-ml 
+```
+
+3. Stop and delete docker container
+```
+docker rm -f flask-ml
 ```
