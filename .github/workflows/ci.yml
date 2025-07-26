@@ -2,8 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: 
-      - main
+    branches: ['**']
 
 jobs:
   push-checks:
