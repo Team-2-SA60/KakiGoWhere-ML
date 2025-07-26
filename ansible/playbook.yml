@@ -1,0 +1,33 @@
+- name: Deploy KakiGoWhere-ML Flask
+  hosts: ml
+  become: yes
+
+  vars:
+    docker_image: "{{ docker_image }}"
+    container_name: flask-ml
+
+  tasks:
+    - name: Create flask-ml directory
+      file:
+        path: /opt/flask-ml
+        state: directory
+
+    - name: Pull latest image
+      command: docker pull {{ docker_image }}
+      args:
+        chdir: /opt/flask-ml
+
+    - name: Stop and remove existing container
+      docker_container:
+        name: "{{ container_name }}"
+        state: absent
+      ignore_errors: yes
+
+    - name: Run container
+      docker_container:
+        name: "{{ container_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "5000:5000"
