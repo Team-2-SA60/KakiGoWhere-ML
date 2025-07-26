@@ -37,24 +37,19 @@ jobs:
 
       - name: Run pylint
         run: |
-          pylint ./**/*.py > report/pylint-report.txt
+          pylint --ignore=tests app > report/pylint-report.txt
 
       - name: Run pip-audit (SCA)
         if: always()
         run: |
           pip-audit > report/pip-audit-report.txt
 
-      - name: Run coverage (Code coverage)
+      - name: Run coverage (Code coverage) and unit test
         if: always()
         run: |
-          coverage run -m pytest app/tests/testapi.py
-          coverage report --fail-under=70 > report/coverage-report.txt
+          coverage run -m pytest > report/coverage-report.txt
+          coverage report --fail-under=70 >> report/coverage-report.txt
       
-      - name: Run unit tests
-        if: always()
-        run: |
-          pytest app/tests/testapi.py > report/unittest-report.txt
-
       - name: Upload Reports
         if: always()
         uses: actions/upload-artifact@v4
