@@ -1,1 +1,1 @@
-# ml package: preprocessing, keyword analysis, category scoring, and recommendation
+# ml package: data loader, preprocess, categories, recommender
