@@ -3,7 +3,7 @@ import pandas as pd
 import requests
 
 RAW_CSV = "../data/places.csv"
-API_URL = "http://localhost:8080/api/places"
+API_URL = "http://localhost:8080/api/placedtos"
 
 def fetch_raw_places():
     resp = requests.get(API_URL, timeout=10)
@@ -14,17 +14,6 @@ def load_existing():
     if os.path.exists(RAW_CSV):
         return pd.read_csv(RAW_CSV)
     return pd.DataFrame(columns=["id", "kmlId", "name", "description", "interestCategories"])
-
-# flatten [{'id':1,'name':'museum'}, ...] into "museum, ..." or return "" if empty
-def flatten_interests(ic_list):
-    if not isinstance(ic_list, list):
-        return ""
-    names = []
-    for entry in ic_list:
-        nm = entry.get("name")
-        if nm:
-            names.append(nm.strip())
-    return ", ".join(names)
 
 def save_places(df):
     cols = ["id", "kmlId", "name", "description", "interestCategories"]
@@ -37,22 +26,40 @@ def update_new_places():
     existing = load_existing()
     # fetch all
     raw = fetch_raw_places()
-    # flatten interestCategories
-    flat_ic  = []
+    # ensure every row has a list
+    ic_list  = []
     for _, row in raw.iterrows():
-        flat_ic.append(flatten_interests(row.get("interestCategories")))
-    raw["interestCategories"] = flat_ic
+        ic = row.get("interestCategories")
+        if ic is None:
+            ic_list.append([])
+        else:
+            ic_list.append(ic)
+    raw["interestCategories"] = ic_list
 
     # find only new IDs
-    old_ids  = set(existing["id"].astype(int))
-    new_mask = raw["id"].astype(int).apply(lambda x: x not in old_ids)
-    new_rows = raw[new_mask].copy()
-    if new_rows.empty:
+    old_ids = set()
+    if "id" in existing.columns:
+        for v in existing["id"].tolist():
+            try:
+                old_ids.add(int(v))
+            except Exception:
+                continue
+
+    new_rows_list = []
+    for _, row in raw.iterrows():
+        try:
+            rid = int(row["id"])
+        except Exception:
+            continue
+        if rid not in old_ids:
+            new_rows_list.append(row)
+
+    if not new_rows_list:
         print("No new places to add.")
         return existing
 
     # append and save
-    combined = pd.concat([existing, new_rows], ignore_index=True)
+    combined = pd.concat([existing, new_rows_list], ignore_index=True)
     save_places(combined)
     return combined
 
