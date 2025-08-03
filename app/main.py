@@ -1,26 +1,39 @@
 '''
 Machine learning deployment for KakiGoWhere
 '''
+import os
 from flask import Flask, request, jsonify
-from ml.data_loader import update_new_places
-from ml.preprocess import preprocess_categories
-from ml.recommender import recommend
-
-# update for new places
-update_new_places()
-# tag them with zero-shot categories
-preprocess_categories()
+from app.ml.data_loader import needs_refresh, refresh_categories
+from app.ml.recommender import recommend
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__)
 
+# on startup, ensure categories exist/ refreshed
+if needs_refresh():
+    refresh_categories()
+
+# scheduler at 00:00 server time
+scheduler = BackgroundScheduler()
+scheduler.add_job(
+    func=lambda: refresh_categories(),
+    trigger="cron",
+    hour=0,
+    minute=0
+)
+scheduler.start()
+atexit.register(lambda: scheduler.shutdown()) # shutdown
+
 @app.route("/recommend", methods=["POST"])
 def recommend_api():
-    data      = request.get_json(force=True)
-    interests = data["interests"]
-    top_k     = data.get("top_k", 3)
-
-    recs = recommend(interests, top_k=top_k)
-    return jsonify([{"id":pid,"name":name} for pid,name in recs])
+    data = request.get_json()
+    interests = data.get("interests")
+    recs = recommend(interests)
+    result = []
+    for place_id, name in recs:
+        result.append({"id": place_id, "name": name})
+    return jsonify(result)
 
 @app.route('/')
 def index():
@@ -30,4 +43,6 @@ def index():
     return jsonify("Hello from Flask on DigitalOcean!")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001)
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)
+

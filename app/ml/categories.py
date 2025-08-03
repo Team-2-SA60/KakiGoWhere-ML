@@ -25,19 +25,23 @@ classifier = pipeline(
 def assign_categories(docs, threshold=0.5, top_n=3):
     all_tags = []
     for text in docs:
-        out    = classifier(text, CATEGORY_LABELS,
-                            hypothesis_template="This text is about {}.")
-        labs   = out["labels"][:top_n] # limit up to 3
-        scores = out["scores"][:top_n]
+        out    = classifier(
+            text,
+            CATEGORY_LABELS,
+            hypothesis_template="This text is about {}."
+        )
+        top_labels   = out["labels"][:top_n] # limit up to 3
+        top_scores = out["scores"][:top_n]
 
         # keep all above threshold
         tags = []
-        for lbl, sc in zip(labs, scores):
-            if sc >= threshold:
-                tags.append(lbl)
+        for label, score in zip(top_labels, top_scores):
+            if score >= threshold:
+                tags.append(label)
 
         # fallback to highest if none pass
         if not tags:
-            tags = [labs[0]]
+            tags = [top_labels[0]]
         all_tags.append(tags)
+
     return all_tags
