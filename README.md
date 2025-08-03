@@ -48,12 +48,25 @@ coverage report --fail-under=70
 docker build -f ./docker/Dockerfile -t flask-ml .
 ```
 
-2. Run docker container. Access at http://localhost:5000
+2. Run docker container. Access at http://localhost:5001 or  http://127.0.0.1:5001/
 ```
-docker run -d --name flask-ml -p 5000:5000 -t flask-ml 
+docker run -d --name flask-ml \
+  -p 5001:5001 \
+  -v docker_app_csv:/data/csv \
+  -e RAW_CSV=/data/csv/places.csv \
+  -e CATEGORISED_CSV=/data/csv/places_categorised.csv \
+  flask-ml
 ```
 
-3. Stop and delete docker container
+3. (Optional) Test recommend API (e.g., With interest "Culture")
+```
+curl -X POST http://127.0.0.1:5001/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"interests":["Culture"]}'
+
+```
+
+4. Stop and delete docker container
 ```
 docker rm -f flask-ml
 ```

@@ -1,65 +1,47 @@
 import os
 import pandas as pd
-import requests
+from app.ml.categories import assign_categories
 
-RAW_CSV = "../data/places.csv"
-API_URL = "http://localhost:8080/api/placedtos"
+# paths inside container
+RAW_CSV = os.environ.get("RAW_CSV", "/data/csv/places.csv")
+CATEGORISED_CSV = os.environ.get("CATEGORISED_CSV", "/data/csv/places_categorised.csv")
 
-def fetch_raw_places():
-    resp = requests.get(API_URL, timeout=10)
-    resp.raise_for_status()
-    return pd.DataFrame(resp.json())
+def load_raw_places():
+    return pd.read_csv(RAW_CSV)
 
-def load_existing():
-    if os.path.exists(RAW_CSV):
-        return pd.read_csv(RAW_CSV)
-    return pd.DataFrame(columns=["id", "kmlId", "name", "description", "interestCategories"])
+def needs_refresh():
+    if not os.path.exists(CATEGORISED_CSV):
+        return True
+    raw_mtime = os.path.getmtime(RAW_CSV)
+    cat_mtime = os.path.getmtime(CATEGORISED_CSV)
+    return raw_mtime > cat_mtime
 
-def save_places(df):
-    cols = ["id", "kmlId", "name", "description", "interestCategories"]
-    df_subset = df[cols]
-    df_subset.to_csv(RAW_CSV, index=False)
-    print(f"Saved {len(df)} places to {RAW_CSV}")
+# refresh categories for places and persist to CATEGORISED_CSV
+def refresh_categories(threshold=0.5, top_n=3):
 
-def update_new_places():
-    # load existing
-    existing = load_existing()
-    # fetch all
-    raw = fetch_raw_places()
-    # ensure every row has a list
-    ic_list  = []
-    for _, row in raw.iterrows():
-        ic = row.get("interestCategories")
-        if ic is None:
-            ic_list.append([])
+    df = load_raw_places()
+
+    combined_texts = []
+    for _, row in df.iterrows():
+        title = row.get("name", "") or ""
+        desc = row.get("description", "") or ""
+        interest_cats = row.get("interestCategories", "")
+
+        if isinstance(interest_cats, list):
+            interest_text = " ".join(interest_cats)
+        elif isinstance(interest_cats, str):
+            interest_text = interest_cats
         else:
-            ic_list.append(ic)
-    raw["interestCategories"] = ic_list
+            interest_text = ""
 
-    # find only new IDs
-    old_ids = set()
-    if "id" in existing.columns:
-        for v in existing["id"].tolist():
-            try:
-                old_ids.add(int(v))
-            except Exception:
-                continue
+        text = f"{title} {desc} {interest_text}".strip().lower()
+        combined_texts.append(text)
 
-    new_rows_list = []
-    for _, row in raw.iterrows():
-        try:
-            rid = int(row["id"])
-        except Exception:
-            continue
-        if rid not in old_ids:
-            new_rows_list.append(row)
+    zs_tags = assign_categories(combined_texts, threshold=threshold, top_n=top_n)
+    df["categories"] = zs_tags
 
-    if not new_rows_list:
-        print("No new places to add.")
-        return existing
-
-    # append and save
-    combined = pd.concat([existing, new_rows_list], ignore_index=True)
-    save_places(combined)
-    return combined
+    # save file
+    df.to_csv(CATEGORISED_CSV, index=False)
+    print(f"[data_loader] Refreshed categories for {len(df)} places into {CATEGORISED_CSV}")
+    return df
 
