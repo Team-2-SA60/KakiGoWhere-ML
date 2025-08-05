@@ -43,18 +43,21 @@ coverage report --fail-under=70
 ```
 
 ## Docker
-1. Build docker iamge
+1. Build docker image
 ```
 docker build -f ./docker/Dockerfile -t flask-ml .
 ```
 
 2. Run docker container. Access at http://localhost:5001 or  http://127.0.0.1:5001/
 ```
-docker run -d --name flask-ml \
+docker run -d \
+  --name flask-ml \
   -p 5001:5001 \
   -v docker_app_csv:/data/csv \
   -e RAW_CSV=/data/csv/places.csv \
   -e CATEGORISED_CSV=/data/csv/places_categorised.csv \
+  -e RAW_RATINGS_CSV=/data/csv/ratings.csv \
+  -e KEYWORDS_RATINGS_CSV=/data/csv/ratings_keywords.csv \
   flask-ml
 ```
 
