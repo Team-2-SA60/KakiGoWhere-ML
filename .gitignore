@@ -5,7 +5,7 @@
 */*pycache*
 */tests/*pycache*
 .pytest_cache
-
+**/*pycache*
 # ignore coverage
 .coverage
 /report
