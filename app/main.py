@@ -40,29 +40,32 @@ def refresh_ratings_keywords_job():
     except Exception as e:
         app.logger.error("Failed to refresh ratings keywords", exc_info=e)
 
-# on startup, call safe "jobs" and load keyword cache
-if needs_refresh():
-    refresh_categories_job()
-    
-if needs_refresh_ratings():
-    refresh_ratings_keywords_job()
-    
-load_keyword_cache()
+try :
+    # on startup, call safe "jobs" and load keyword cache
+    if needs_refresh():
+        refresh_categories_job()
+        
+    if needs_refresh_ratings():
+        refresh_ratings_keywords_job()
+        
+    load_keyword_cache()
 
-# scheduler at 00:00 server time
-scheduler = BackgroundScheduler()
-scheduler.add_job(
-    func=refresh_categories_job,
-    trigger="cron",
-    hour=0, minute=0
-)
-scheduler.add_job(
-    func=refresh_ratings_keywords_job,
-    trigger="cron",
-    hour=0, minute=0
-)
-scheduler.start()
-atexit.register(lambda: scheduler.shutdown()) # shutdown
+    # scheduler at 00:00 server time
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(
+        func=refresh_categories_job,
+        trigger="cron",
+        hour=0, minute=0
+    )
+    scheduler.add_job(
+        func=refresh_ratings_keywords_job,
+        trigger="cron",
+        hour=0, minute=0
+    )
+    scheduler.start()
+    atexit.register(lambda: scheduler.shutdown()) # shutdown
+except Exception as e:
+    print(e)
 
 @app.route("/recommend", methods=["POST"])
 def recommend_api():

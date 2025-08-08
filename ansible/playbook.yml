@@ -30,4 +30,11 @@
         state: started
         restart_policy: always
         ports:
-          - "5000:5000"
+          - "5001:5001"
+        volumes:
+          - springboot-app_app_csv:/data/csv
+        env:
+          RAW_CSV: /data/csv/places.csv
+          CATEGORISED_CSV: /data/csv/places_categorised.csv
+          RAW_RATINGS_CSV: /data/csv/ratings.csv
+          KEYWORDS_RATINGS_CSV: /data/csv/ratings_keywords.csv
