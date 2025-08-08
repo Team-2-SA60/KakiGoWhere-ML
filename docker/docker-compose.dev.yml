@@ -1,0 +1,21 @@
+services:
+  flask-ml:
+    image: flask-ml
+    build:
+      context: ./app
+      dockerfile: ./docker/Dockerfile
+    ports:
+      - "5001:5001"
+    volumes:
+      - app_csv:/data/csv
+      - huggingface-cache:/app/cache/huggingface
+    environment:
+      RAW_CSV: /data/csv/places.csv
+      CATEGORISED_CSV: /data/csv/places_categorised.csv
+      RAW_RATINGS_CSV: /data/csv/ratings.csv
+      KEYWORDS_RATINGS_CSV: /data/csv/ratings_keywords.csv
+      HF_HOME: /app/cache/huggingface
+
+volumes:
+  app_csv:
+  huggingface-cache:

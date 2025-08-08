@@ -61,6 +61,12 @@ docker run -d \
   flask-ml
 ```
 
+OR
+
+```
+docker compose -f ./docker/docker-compose.dev.yml up -d
+```
+
 3. (Optional) Test recommend API (e.g., With interest "Culture")
 ```
 curl -X POST http://127.0.0.1:5001/recommend \
