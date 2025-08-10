@@ -3,6 +3,7 @@ Machine learning deployment for KakiGoWhere
 '''
 import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from app.ml.data_loader import needs_refresh, refresh_categories, needs_refresh_ratings, refresh_ratings_keywords, KEYWORDS_RATINGS_CSV
 from app.ml.recommender import recommend
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -11,6 +12,7 @@ import json
 import pandas as pd
 
 app = Flask(__name__)
+CORS(app)
 
 # setup cache for keywords for fast loading
 _keyword_cache = {}
