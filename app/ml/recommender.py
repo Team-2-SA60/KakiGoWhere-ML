@@ -2,6 +2,7 @@ import pandas as pd
 import ast
 from operator import itemgetter
 import os
+import random
 
 CATEGORISED_CSV = os.environ.get("CATEGORISED_CSV", "/data/csv/places_categorised.csv")
 DEFAULT_TOP_K = 3
@@ -75,7 +76,8 @@ def recommend(interests, top_k=DEFAULT_TOP_K):
 
         scored.append((place_id, name, match_count))
 
-    # sort by descending match_count
+    # randomise, then sort by descending match_count
+    random.shuffle(scored)
     scored.sort(key=itemgetter(2), reverse=True)
 
     # take top_k with positive score (optional: you can include zero-score if you want fallback)
