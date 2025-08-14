@@ -2,7 +2,7 @@ services:
   flask-ml:
     image: flask-ml
     build:
-      context: ./app
+      context: ..
       dockerfile: ./docker/Dockerfile
     ports:
       - "5001:5001"
