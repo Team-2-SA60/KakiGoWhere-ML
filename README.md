@@ -1,81 +1,35 @@
-## For developing
-1. (Optional) Create virtual python environment
-```
-python -m venv .venv
-```
 
-2. (Optional) Activate venv environment
+## 🛠️ Getting started using 🐳 Docker
 
-- For Windows
-```
-.venv\Scripts\activate.bat
-```
+Pre-requisite:
+- Follow steps on [KakiGoWhere-Backend](https://github.com/Team-2-SA60/KakiGoWhere-Backend)
 
-- For Linux/Mac
-```
-source .venv/bin/activate
-```
+---
 
-3. Install dependencies
-```
-pip install -r requirements.txt
-```
+1. Open terminal / command prompt and change directory to KakiGoWhere
 
-## Local testing commands
-1. Lint (Pylint)
-```
-pylint --ignore=tests app
-```
+    ```
+    cd KakiGoWhere
+    ```
 
-2. SCA (pip-audit)
-```
-pip-audit
-```
+2. Clone repository
 
-3. Unit tests (pytest)
-```
-coverage run -m pytest
-```
+    ```
+    https://github.com/Team-2-SA60/KakiGoWhere-ML.git
+    ```
 
-4. Code coverage (coverage)
-```
-coverage report --fail-under=70
-```
+3. Change directory to KakiGoWhere-ML
 
-## Docker
-1. Build docker image
-```
-docker build -f ./docker/Dockerfile -t flask-ml .
-```
+    ```
+    cd KakiGoWhere-ML
+    ```
 
-2. Run docker container. Access at http://localhost:5001 or  http://127.0.0.1:5001/
-```
-docker run -d \
-  --name flask-ml \
-  -p 5001:5001 \
-  -v docker_app_csv:/data/csv \
-  -e RAW_CSV=/data/csv/places.csv \
-  -e CATEGORISED_CSV=/data/csv/places_categorised.csv \
-  -e RAW_RATINGS_CSV=/data/csv/ratings.csv \
-  -e KEYWORDS_RATINGS_CSV=/data/csv/ratings_keywords.csv \
-  flask-ml
-```
+4. Build and run Flask-ML using Docker Compose
 
-OR
+    ```
+    docker compose -f ./docker/docker-compose.dev.yml up -d --build
+    ```
 
-```
-docker compose -f ./docker/docker-compose.dev.yml up -d
-```
+    > This process can take very long (15 mins - 30 mins depending on CPU performance and RAM) due to downloading of pre-trained models and CPU-intensive tasks
 
-3. (Optional) Test recommend API (e.g., With interest "Culture")
-```
-curl -X POST http://127.0.0.1:5001/recommend \
-  -H "Content-Type: application/json" \
-  -d '{"interests":["Culture"]}'
-
-```
-
-4. Stop and delete docker container
-```
-docker rm -f flask-ml
-```
+5. Go back to [KakiGoWhere-Backend](https://github.com/Team-2-SA60/KakiGoWhere-Backend) and continue steps
