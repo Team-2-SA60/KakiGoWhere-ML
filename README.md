@@ -33,3 +33,7 @@ Pre-requisite:
     > This process can take very long (15 mins - 30 mins depending on CPU performance and RAM) due to downloading of pre-trained models and CPU-intensive tasks
 
 5. Go back to [KakiGoWhere-Backend](https://github.com/Team-2-SA60/KakiGoWhere-Backend) and continue steps
+
+6. When all containers are running: 
+- Access web application @ http://localhost/admin/login
+- Mobile app (android) @ https://github.com/Team-2-SA60/KakiGoWhere-Android
