@@ -1,4 +1,10 @@
 
+## Production Server
+
+KakiGoWhere is deployed on Digital Ocean, and will be kept running until 31st August 2025.
+
+You can access our deployed Web Application [here](http://206.189.43.202/admin/login)
+
 ## 🛠️ Getting started using 🐳 Docker
 
 Pre-requisite:
@@ -15,7 +21,7 @@ Pre-requisite:
 2. Clone repository
 
     ```
-    https://github.com/Team-2-SA60/KakiGoWhere-ML.git
+    git clone https://github.com/Team-2-SA60/KakiGoWhere-ML.git
     ```
 
 3. Change directory to KakiGoWhere-ML
